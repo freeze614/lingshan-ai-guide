@@ -71,6 +71,15 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   res.status(500).json({ error: '服务器内部错误', detail: err.message });
 });
 
+// Prevent process crash from unhandled rejections
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught exception:', err.message);
+  console.error(err.stack);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL] Unhandled rejection:', reason);
+});
+
 // Start server
 const server = app.listen(PORT, async () => {
   console.log('');
