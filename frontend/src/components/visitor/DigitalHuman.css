@@ -1,0 +1,226 @@
+/* ═══════════════════════════════════════════════════════════
+   DigitalHuman — Live2D canvas + static PNG fallback
+   ═══════════════════════════════════════════════════════════ */
+
+.dh-char {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: dhFadeIn 0.6s ease both;
+}
+@keyframes dhFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Sizes ─────────────────────────────────────────── */
+.dh-char--large { min-height: 360px; }
+.dh-char--normal { min-height: 300px; }
+
+/* ── Live2D canvas container ───────────────────────── */
+.dh-char__live2d {
+  border-radius: 20px;
+  overflow: hidden;
+  position: absolute;
+  inset: -30px -20px -20px -20px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dh-char__live2d canvas {
+  display: block;
+  border-radius: 20px;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+
+/* Live2D PIXI overlay — sits on top of static image */
+.dh-char__pixi {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ── Glow aura behind character ────────────────────── */
+.dh-char__glow {
+  position: absolute;
+  width: 220px; height: 220px;
+  left: 50%; top: 40%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle, var(--dh-glow, rgba(255,200,180,0.22)), transparent 70%);
+  animation: dhGlowPulse 3s ease-in-out infinite;
+}
+.dh-char--speaking .dh-char__glow { animation-duration: 1s; }
+@keyframes dhGlowPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  50%      { transform: translate(-50%, -50%) scale(1.12); opacity: 1; }
+}
+
+/* ── Frame wrapper (for ring alignment) ────────────── */
+.dh-char__frame-wrap {
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+}
+
+/* ── Frame ─────────────────────────────────────────── */
+.dh-char__frame {
+  position: relative;
+  border-radius: 20px;
+  overflow: visible;       /* allow Live2D model to extend beyond frame */
+  width: 220px;
+  height: 280px;
+}
+.dh-char__frame .dh-char__img {
+  border-radius: 20px;
+  overflow: hidden;        /* keep static image clipped */
+}
+
+/* ── Breathing light ring ──────────────────────────── */
+.dh-char__ring {
+  position: absolute;
+  inset: -18px;
+  border-radius: 26px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  box-shadow: none;
+}
+.dh-char .dh-char__ring {
+  box-shadow: 0 0 18px 3px var(--dh-ring, rgba(196,29,127,0.5)), 0 0 45px 8px var(--dh-ring-outer, rgba(233,30,99,0.35)), 0 0 70px 16px var(--dh-ring-far, rgba(255,107,157,0.2)), inset 0 0 18px 3px var(--dh-ring, rgba(196,29,127,0.25));
+}
+
+/* ── Image ─────────────────────────────────────────── */
+.dh-char__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+  opacity: 0;
+  transition: opacity 0.5s, filter 0.6s;
+  animation: dhBreathe 3.5s ease-in-out infinite;
+}
+.dh-char__img.loaded { opacity: 1; }
+@keyframes dhBreathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.015); }
+}
+
+/* Emotion image filters */
+.dh-char--happy    .dh-char__img { filter: brightness(1.06) saturate(1.1); }
+.dh-char--greet    .dh-char__img { filter: brightness(1.08) saturate(1.15); }
+.dh-char--think    .dh-char__img { filter: brightness(0.96) saturate(0.9) hue-rotate(-3deg); }
+.dh-char--farewell .dh-char__img { filter: brightness(1) saturate(1); }
+.dh-char--sorry    .dh-char__img { filter: brightness(0.9) saturate(0.8); }
+
+/* ── Blush ──────────────────────────────────────────── */
+.dh-char__blush {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+  background:
+    radial-gradient(ellipse at 30% 48%, rgba(255,140,130,0.45) 0%, transparent 18%),
+    radial-gradient(ellipse at 70% 48%, rgba(255,140,130,0.45) 0%, transparent 18%);
+}
+.dh-char--happy .dh-char__blush   { opacity: 0.65; }
+.dh-char--greet .dh-char__blush   { opacity: 0.75; }
+.dh-char--explain .dh-char__blush { opacity: 0.18; }
+
+/* ── Sound bars ─────────────────────────────────────── */
+.dh-char__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 24px;
+  margin-bottom: 2px;
+  z-index: 3;
+}
+.dh-char__bar {
+  display: block;
+  width: 4px;
+  background: linear-gradient(to top, var(--dh-primary, #c41d7f), var(--dh-accent, #ff6b9d));
+  border-radius: 3px;
+  animation: dhBar 0.65s ease-in-out infinite;
+  min-height: 3px;
+}
+@keyframes dhBar {
+  0%, 100% { height: 4px; opacity: 0.4; }
+  50%      { height: 18px; opacity: 1; }
+}
+
+/* ── Particles ──────────────────────────────────────── */
+.dh-char__particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.dh-char__particle {
+  position: absolute;
+  bottom: -10px;
+  width: 4px; height: 4px;
+  background: #ffd700;
+  border-radius: 50%;
+  animation: dhParticle linear infinite;
+  box-shadow: 0 0 4px #ffd700;
+}
+@keyframes dhParticle {
+  0%   { transform: translateY(0) scale(0); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 0.6; }
+  100% { transform: translateY(-320px) scale(1.2); opacity: 0; }
+}
+
+/* ── Nameplate ──────────────────────────────────────── */
+.dh-char__info {
+  text-align: center;
+  margin-top: 4px;
+  z-index: 3;
+}
+.dh-char__name {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 1px;
+}
+.dh-char__role {
+  display: block;
+  font-size: 11px;
+  color: #999;
+  margin-top: 1px;
+}
+.dh-char__status {
+  display: block;
+  font-size: 10px;
+  color: #bbb;
+  margin-top: 1px;
+  transition: color 0.3s;
+}
+.dh-char__status.active {
+  color: var(--dh-primary, #c41d7f);
+  animation: dhStatus 1.4s ease-in-out infinite;
+}
+@keyframes dhStatus { 0%,100%{opacity:0.7} 50%{opacity:1} }
+
+/* ── Fallback ───────────────────────────────────────── */
+.dh-char__fallback {
+  width: 240px; height: 280px;
+  background: linear-gradient(160deg, #fef5fb, #fff0f5);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 72px;
+  box-shadow: 0 4px 20px rgba(196,29,127,0.1);
+}
+.dh-char__fallback span:nth-child(2) { font-size: 18px; font-weight: 700; color: #c41d7f; }
+.dh-char__fallback span:nth-child(3) { font-size: 12px; color: #999; }

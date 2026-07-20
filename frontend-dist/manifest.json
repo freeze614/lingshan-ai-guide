@@ -1,0 +1,18 @@
+{
+  "name": "灵山胜境 AI 数字人导游",
+  "short_name": "灵小禅",
+  "description": "7×24小时在线的AI数字人导游，智能问答、语音交互、情感陪伴",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf8f5",
+  "theme_color": "#c41d7f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏯</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["travel", "education", "entertainment"]
+}

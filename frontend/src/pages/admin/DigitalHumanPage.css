@@ -1,0 +1,9 @@
+.admin-dh-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 320px;
+  background: linear-gradient(135deg, #fdf2f8, #f8f4ff);
+  border-radius: 16px;
+  padding: 16px;
+}

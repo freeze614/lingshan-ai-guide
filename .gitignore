@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Runtime data (regenerated on each run)
+data/conversations.json
+data/daily_stats.json
+data/feedback.json
+
+# Vector DB & Model cache (large, downloaded on first run)
+data/chroma_db/
+data/model_cache/
+
+# TTS cache
+data/tts-cache/
+
+# Uploaded files
+data/uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
